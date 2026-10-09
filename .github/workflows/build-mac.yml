@@ -1,0 +1,50 @@
+name: build-macos
+
+on:
+  push:
+    branches: [mac-build]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.14.0
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --immutable
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+
+      - name: Build macOS dmg (arm64)
+        run: yarn build:mac
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FFXIV-Teamcraft-11.4.31-mac-arm64
+          path: release/*.dmg
+          if-no-files-found: error
+
+      - name: Attach dmg to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view mac-v11.4.31 --repo "$GITHUB_REPOSITORY" || \
+            gh release create mac-v11.4.31 --repo "$GITHUB_REPOSITORY" \
+              --title "FFXIV Teamcraft 11.4.31 (macOS arm64, unofficial)" \
+              --notes "Unofficial macOS arm64 (Apple Silicon) build of FFXIV Teamcraft 11.4.31, produced from the v11.4.31 tag. Not affiliated with the FFXIV Teamcraft project. Packet capture is unavailable on macOS. App is unsigned: right-click -> Open the first time, or run xattr -d com.apple.quarantine on the .app."
+          gh release upload mac-v11.4.31 release/*.dmg --clobber --repo "$GITHUB_REPOSITORY"
