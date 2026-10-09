@@ -34,7 +34,7 @@
           ]
         }
       ],
-      "icon": "./tools/build/icon.png",
+      "icon": "./tools/build/icon-mac.png",
       "artifactName": "${productName}.AppImage",
       "target": [
         "AppImage"
@@ -53,7 +53,7 @@
     },
     "mac": {
       "category": "public.app-category.games",
-    "icon": "./tools/build/icon.png",
+    "icon": "./tools/build/icon-mac.png",
     "artifactName": "FFXIV-Teamcraft-${version}-mac-arm64.dmg",
     "target": "dmg",
       "extraFiles": [
